@@ -1,0 +1,38 @@
+parameters:
+    dimkinthepro_jwt_auth_public_key: '%env(resolve:DIMKINTHEPRO_JWT_AUTH_PUBLIC_KEY)%'
+    dimkinthepro_jwt_auth_private_key: '%env(resolve:DIMKINTHEPRO_JWT_AUTH_PRIVATE_KEY)%'
+    dimkinthepro_jwt_auth_passphrase: '%env(string:DIMKINTHEPRO_JWT_AUTH_PASSPHRASE)%'
+    dimkinthepro_jwt_auth_token_ttl: 36000 # 10 hour
+    dimkinthepro_jwt_auth_algorithm: 'RS512'
+    dimkinthepro_jwt_auth_refresh_token_ttl: 2592000 # 1 month
+    dimkinthepro_jwt_auth_refresh_token_length: 128 # bytes
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        bind:
+            $authPublicKey: '%dimkinthepro_jwt_auth_public_key%'
+            $authPrivateKey: '%dimkinthepro_jwt_auth_private_key%'
+            $authPassphrase: '%dimkinthepro_jwt_auth_passphrase%'
+            $authJwtTokenTtl: '%dimkinthepro_jwt_auth_token_ttl%'
+            $authAlgorithm: '%dimkinthepro_jwt_auth_algorithm%'
+            $authRefreshTokenTtl: '%dimkinthepro_jwt_auth_refresh_token_ttl%'
+            $authRefreshTokenLength: '%dimkinthepro_jwt_auth_refresh_token_length%'
+
+    _instanceof:
+        DimkinThePro\CommandQuery\Query\QueryHandlerInterface:
+            tags:
+                - { name: messenger.message_handler, bus: query_bus }
+
+        DimkinThePro\CommandQuery\Command\CommandHandlerInterface:
+            tags:
+                - { name: messenger.message_handler, bus: command_bus }
+
+    DimkinThePro\JwtAuth\:
+        resource: '../../../'
+        exclude:
+            - '../../../Domain/Entity'
+            - '../../../**/*Enum.php'
+            - '../../../**/*Exception.php'
+            - '../../../**/*Test.php'

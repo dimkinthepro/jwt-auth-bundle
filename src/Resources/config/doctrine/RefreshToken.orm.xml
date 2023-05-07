@@ -1,0 +1,17 @@
+<doctrine-mapping xmlns="https://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="https://doctrine-project.org/schemas/orm/doctrine-mapping
+                          https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="DimkinThePro\JwtAuth\Domain\Entity\RefreshToken" table="refresh_token">
+        <id name="id" type="bigint">
+            <generator strategy="IDENTITY"/>
+        </id>
+        <field name="userIdentifier" column="user_identifier" type="string"/>
+        <field name="token" type="text"/>
+        <field name="validUntil" column="valid_until" type="datetime_immutable"/>
+        <unique-constraints>
+            <unique-constraint name="unq__token" columns="token"/>
+        </unique-constraints>
+    </entity>
+</doctrine-mapping>
