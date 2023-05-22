@@ -10,7 +10,7 @@ composer require dimkinthepro/jwt-auth-bundle
 
 return [
 #...
-    DimkinThePro\JwtAuth\DimkinTheProJwtAuthBundle::class => ['all' => true],
+    \JwtAuthBundle::class => ['all' => true],
 ];
 ```
 
@@ -39,6 +39,33 @@ security:
           username_path: email
           success_handler: DimkinThePro\JwtAuth\Infrastructure\Security\SuccessAuthenticationHandler
           failure_handler: DimkinThePro\JwtAuth\Infrastructure\Security\FailAuthenticationHandler
+```
+
+```yaml
+# config/packages/doctrine.yaml
+doctrine:
+    #...
+    orm:
+        #...
+        mappings:
+            #...
+            JwtAuthBundle:
+                is_bundle: true
+                type: xml
+                dir: Domain/Entity
+```
+
+```yaml
+# config/packages/messenger.yaml
+framework:
+    messenger:
+        default_bus: query_bus
+        buses:
+            query_bus:
+            command_bus:
+                middleware:
+                    - doctrine_transaction
+#...
 ```
 
 ### 2. Generate key pair:

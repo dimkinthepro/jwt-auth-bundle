@@ -1,4 +1,8 @@
 parameters:
+    env(DIMKINTHEPRO_JWT_AUTH_PUBLIC_KEY): '%kernel.project_dir%/var/dimkinthepro/jwt-auth-bundle/public.pem'
+    env(DIMKINTHEPRO_JWT_AUTH_PRIVATE_KEY): '%kernel.project_dir%/var/dimkinthepro/jwt-auth-bundle/private.pem'
+    env(DIMKINTHEPRO_JWT_AUTH_PASSPHRASE): 'SomeRandomPassPhrase'
+
     dimkinthepro_jwt_auth_public_key: '%env(resolve:DIMKINTHEPRO_JWT_AUTH_PUBLIC_KEY)%'
     dimkinthepro_jwt_auth_private_key: '%env(resolve:DIMKINTHEPRO_JWT_AUTH_PRIVATE_KEY)%'
     dimkinthepro_jwt_auth_passphrase: '%env(string:DIMKINTHEPRO_JWT_AUTH_PASSPHRASE)%'
@@ -30,9 +34,9 @@ services:
                 - { name: messenger.message_handler, bus: command_bus }
 
     DimkinThePro\JwtAuth\:
-        resource: '../../../'
+        resource: '../../'
         exclude:
-            - '../../../Domain/Entity'
-            - '../../../**/*Enum.php'
-            - '../../../**/*Exception.php'
-            - '../../../**/*Test.php'
+            - '../../DependencyInjection/*'
+            - '../../Domain/Entity/*'
+            - '../../**/*Enum.php'
+            - '../../**/*Exception.php'
