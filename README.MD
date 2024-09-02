@@ -61,14 +61,28 @@ doctrine:
                 type: xml
                 prefix: Dimkinthepro\JwtAuth\Domain\Entity
 ```
-After that you can generate migrations:
+
+### 6. Add Routes
+```yaml
+# config/routes.yaml
+api_login:
+  path: /api/login
+  methods: [POST]
+
+api_token_refresh:
+  path: /api/token-refresh
+  controller: Dimkinthepro\JwtAuth\Infrastructure\Controller\TokenRefreshAction
+  methods: [POST]
+```
+
+### 7. Generate migrations:
 ```bash
 php bin/console doctrine:migrations:diff
 
 php bin/console doctrine:migrations:migrate
 ```
 
-### 6. Generate key pair:
+### 8. Generate key pair:
 ```bash
-bin/console dimkinthepro:jwt-auth:generate-key-pair
+php bin/console dimkinthepro:jwt-auth:generate-key-pair
 ```

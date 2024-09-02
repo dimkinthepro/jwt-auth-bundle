@@ -21,13 +21,13 @@ class RefreshTokenWriteRepository extends ServiceEntityRepository implements Ref
 
     public function save(RefreshToken $token): void
     {
-        $this->_em->persist($token);
-        $this->_em->flush();
+        $this->getEntityManager()->persist($token);
+        $this->getEntityManager()->flush();
     }
 
     public function delete(RefreshToken $token): void
     {
-        $this->_em->remove($token);
-        $this->_em->flush();
+        $this->getEntityManager()->remove($token);
+        $this->getEntityManager()->flush();
     }
 }

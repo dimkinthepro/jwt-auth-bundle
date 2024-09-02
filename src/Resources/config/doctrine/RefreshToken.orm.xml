@@ -10,7 +10,7 @@
         </id>
 
         <field name="userIdentifier" column="user_identifier" type="string" length="255"/>
-        <field name="token" column="token" type="string" length="255" unique="true"/>
+        <field name="token" column="token" type="string" length="500" unique="true"/>
         <field name="validUntil" column="valid_until" type="datetime_immutable"/>
     </entity>
 </doctrine-mapping>
