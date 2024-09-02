@@ -1,0 +1,4 @@
+dimkinthepro_jwt_auth_token_refresh:
+    path: /token-refresh
+    controller: Dimkinthepro\JwtAuth\Infrastructure\Controller\TokenRefreshAction
+    methods: [POST]

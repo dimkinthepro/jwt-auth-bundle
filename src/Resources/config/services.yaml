@@ -1,0 +1,20 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        bind:
+            $authPublicKey: '%dimkinthepro_jwt_auth.config.public_key_path%'
+            $authPrivateKey: '%dimkinthepro_jwt_auth.config.private_key_path%'
+            $authPassphrase: '%dimkinthepro_jwt_auth.config.passphrase%'
+            $authJwtTokenTtl: '%dimkinthepro_jwt_auth.config.token_ttl%'
+            $authAlgorithm: '%dimkinthepro_jwt_auth.config.algorithm%'
+            $authRefreshTokenTtl: '%dimkinthepro_jwt_auth.config.refresh_token_ttl%'
+            $authRefreshTokenLength: '%dimkinthepro_jwt_auth.config.refresh_token_length%'
+
+    Dimkinthepro\JwtAuth\:
+        resource: '../../'
+        exclude:
+            - '../../DependencyInjection/*'
+            - '../../Domain/Entity/*'
+            - '../../**/*Enum.php'
+            - '../../**/*Exception.php'

@@ -1,0 +1,55 @@
+{
+    "name": "dimkinthepro/jwt-auth-bundle",
+    "type": "symfony-bundle",
+    "description": "This bundle provides JWT authentication",
+    "keywords": ["symfony", "bundle", "jwt"],
+    "homepage": "https://github.com/dimkinthepro/jwt-auth-bundle",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "ext-openssl": "*",
+        "doctrine/doctrine-bundle": "^2 || ^3",
+        "doctrine/orm": "^2 || ^3",
+        "symfony/config": "^5 || ^6 || ^7",
+        "symfony/dependency-injection": "^6 || ^7",
+        "symfony/dotenv": "^6 || ^7",
+        "symfony/form": "^6 || ^7",
+        "symfony/framework-bundle": "^6 || ^7",
+        "symfony/http-kernel": "^6 || ^7",
+        "symfony/orm-pack": "^2 || ^3",
+        "symfony/security-bundle": "^6 || ^7",
+        "symfony/validator": "^6 || ^7"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.21",
+        "friendsofphp/php-cs-fixer": "^3.16",
+        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan-strict-rules": "^1.5",
+        "phpunit/phpunit": "^9.6",
+        "squizlabs/php_codesniffer": "^3.7",
+        "symfony/browser-kit": "^6.2",
+        "symfony/console": "^6.2",
+        "symfony/yaml": "*"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Dimkinthepro\\JwtAuth\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dimkinthepro\\JwtAuth\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "check-code": [
+            "php-cs-fixer fix ./src ./tests --diff --config=php-cs-fixer.php",
+            "phpcs ./src ./tests --standard=phpcs.xml -d memory_limit=500M",
+            "phpstan analyse -c phpstan.neon --memory-limit=500M",
+            "vendor/bin/phpunit"
+        ]
+    }
+}
