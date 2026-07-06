@@ -1,0 +1,23 @@
+api_login:
+    path: /api/user/login
+    methods: [POST]
+
+api_token_refresh:
+    path: /api/token-refresh
+    controller: Dimkinthepro\JwtAuth\Infrastructure\Controller\TokenRefreshAction
+    methods: [POST]
+
+api_sessions_list:
+    path: /api/sessions
+    controller: Dimkinthepro\JwtAuth\Infrastructure\Controller\SessionListAction
+    methods: [GET]
+
+api_session_revoke:
+    path: /api/sessions/{sessionId}
+    controller: Dimkinthepro\JwtAuth\Infrastructure\Controller\SessionRevokeAction
+    methods: [DELETE]
+
+api_sessions_revoke_all:
+    path: /api/sessions
+    controller: Dimkinthepro\JwtAuth\Infrastructure\Controller\SessionRevokeAllAction
+    methods: [DELETE]

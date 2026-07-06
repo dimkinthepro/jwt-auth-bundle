@@ -1,0 +1,22 @@
+dimkinthepro_jwt_auth:
+    public_key_path: '%kernel.project_dir%/var/test-keys/public.pem'
+    private_key_path: '%kernel.project_dir%/var/test-keys/private.pem'
+    passphrase: '%env(JWT_AUTH_PASSPHRASE)%'
+    token_ttl: 900
+    algorithm: 'RS256'
+    refresh_token_ttl: 2592000
+    refresh_token_length: 128
+    issuer: 'jwt-auth-test'
+    audience: 'jwt-auth-test-client'
+    clock_skew_leeway: 60
+    blocklist:
+        enabled: true
+    token_extractors:
+        authorization_header:
+            enabled: true
+        cookie:
+            enabled: true
+        query_parameter:
+            enabled: true
+        split_cookie:
+            enabled: true

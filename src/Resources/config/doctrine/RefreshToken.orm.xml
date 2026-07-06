@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping
+        xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://doctrine-project.org/schemas/orm/doctrine-mapping.xsd"
+>
+    <entity name="Dimkinthepro\JwtAuth\Domain\Entity\RefreshToken" table="refresh_token">
+        <id name="id" type="integer">
+            <generator strategy="IDENTITY"/>
+        </id>
+
+        <field name="userIdentifier" column="user_identifier" type="string" length="255"/>
+        <field name="tokenHash" column="token_hash" type="string" length="500" unique="true"/>
+        <field name="validUntil" column="valid_until" type="datetime_immutable"/>
+        <field name="sessionId" column="session_id" type="string" length="64" unique="true"/>
+        <field name="createdAt" column="created_at" type="datetime_immutable"/>
+        <field name="lastUsedAt" column="last_used_at" type="datetime_immutable"/>
+        <field name="deviceName" column="device_name" type="string" length="255" nullable="true"/>
+        <field name="userAgent" column="user_agent" type="string" length="500" nullable="true"/>
+        <field name="ip" column="ip" type="string" length="45" nullable="true"/>
+
+        <indexes>
+            <index name="idx_refresh_token_user_identifier" columns="user_identifier"/>
+        </indexes>
+    </entity>
+</doctrine-mapping>

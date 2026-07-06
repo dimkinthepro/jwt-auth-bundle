@@ -1,0 +1,23 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\InMemoryUser: plaintext
+
+    providers:
+        test_users:
+            memory:
+                users:
+                    'user@example.com':
+                        password: 'Password123!'
+                        roles: ['ROLE_USER']
+
+    firewalls:
+        main:
+            pattern: ^/api/
+            stateless: true
+            provider: test_users
+            auth_jwt: ~
+            json_login:
+                check_path: /api/user/login
+                username_path: email
+                success_handler: Dimkinthepro\JwtAuth\Infrastructure\Security\SuccessAuthenticationHandler
+                failure_handler: Dimkinthepro\JwtAuth\Infrastructure\Security\FailAuthenticationHandler
