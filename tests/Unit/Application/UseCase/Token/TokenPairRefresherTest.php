@@ -2,19 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Dimkinthepro\JwtAuth\Tests\Unit\Application\UseCase\RefreshToken;
+namespace Dimkinthepro\JwtAuth\Tests\Unit\Application\UseCase\Token;
 
 use Dimkinthepro\JwtAuth\Application\Component\Decoder\RefreshTokenDecoderInterface;
-use Dimkinthepro\JwtAuth\Application\Component\Manager\RefreshTokenManager;
+use Dimkinthepro\JwtAuth\Application\Component\Manager\JwtTokenManagerInterface;
+use Dimkinthepro\JwtAuth\Application\Component\Manager\RefreshTokenManagerInterface;
 use Dimkinthepro\JwtAuth\Application\Component\Persistence\TransactionManagerInterface;
 use Dimkinthepro\JwtAuth\Application\Component\Validator\RefreshTokenValidatorInterface;
-use Dimkinthepro\JwtAuth\Application\UseCase\RefreshToken\RefreshTokenRefresher;
+use Dimkinthepro\JwtAuth\Application\UseCase\Token\TokenPairRefresher;
+use Dimkinthepro\JwtAuth\Domain\Entity\JwtToken;
 use Dimkinthepro\JwtAuth\Domain\Entity\RefreshToken;
+use Dimkinthepro\JwtAuth\Domain\Enum\AlgorithmEnum;
+use Dimkinthepro\JwtAuth\Domain\Enum\TokenTypeEnum;
 use Dimkinthepro\JwtAuth\Infrastructure\Exception\RefreshTokenExpiredException;
+use Dimkinthepro\JwtAuth\Infrastructure\Factory\DateTimeFactory;
 use Faker\Factory;
 use PHPUnit\Framework\TestCase;
 
-class RefreshTokenRefresherTest extends TestCase
+class TokenPairRefresherTest extends TestCase
 {
     public function testRefreshRotatesToken(): void
     {
@@ -22,20 +27,32 @@ class RefreshTokenRefresherTest extends TestCase
         $rawToken = bin2hex(random_bytes(128));
         $oldToken = $this->createToken($email, time() + 3600);
         $newToken = $this->createToken($email, time() + 7200);
+        $jwtToken = $this->createJwtToken($email);
 
-        $manager = $this->createMock(RefreshTokenManager::class);
+        $manager = $this->createMock(RefreshTokenManagerInterface::class);
         $manager->expects(self::once())->method('findByToken')->with($rawToken)->willReturn($oldToken);
         $manager->expects(self::once())->method('rotate')->with($oldToken)->willReturn($newToken);
         $manager->expects(self::once())->method('delete')->with($oldToken);
 
-        $refresher = new RefreshTokenRefresher(
+        $jwtTokenManager = $this->createMock(JwtTokenManagerInterface::class);
+        $jwtTokenManager
+            ->expects(self::once())
+            ->method('create')
+            ->with($email, $newToken->getSessionId())
+            ->willReturn($jwtToken);
+
+        $refresher = new TokenPairRefresher(
+            $jwtTokenManager,
             $this->createDecoder($rawToken),
             $manager,
             $this->createValidator(),
             $this->createTransactionManager()
         );
 
-        self::assertSame($newToken, $refresher->refresh(base64_encode($rawToken)));
+        $tokenPair = $refresher->getPairByRefreshToken(base64_encode($rawToken));
+
+        self::assertSame($newToken, $tokenPair->refreshToken);
+        self::assertSame($jwtToken, $tokenPair->token);
     }
 
     public function testExpiredTokenIsNotRotated(): void
@@ -43,7 +60,7 @@ class RefreshTokenRefresherTest extends TestCase
         $rawToken = bin2hex(random_bytes(128));
         $expiredToken = $this->createToken(Factory::create()->email(), time() - 3600);
 
-        $manager = $this->createMock(RefreshTokenManager::class);
+        $manager = $this->createMock(RefreshTokenManagerInterface::class);
         $manager->method('findByToken')->with($rawToken)->willReturn($expiredToken);
         $manager->expects(self::never())->method('rotate');
         $manager->expects(self::never())->method('delete');
@@ -51,7 +68,11 @@ class RefreshTokenRefresherTest extends TestCase
         $validator = $this->createMock(RefreshTokenValidatorInterface::class);
         $validator->method('validate')->willThrowException(new RefreshTokenExpiredException('expired'));
 
-        $refresher = new RefreshTokenRefresher(
+        $jwtTokenManager = $this->createMock(JwtTokenManagerInterface::class);
+        $jwtTokenManager->expects(self::never())->method('create');
+
+        $refresher = new TokenPairRefresher(
+            $jwtTokenManager,
             $this->createDecoder($rawToken),
             $manager,
             $validator,
@@ -60,7 +81,7 @@ class RefreshTokenRefresherTest extends TestCase
 
         self::expectException(RefreshTokenExpiredException::class);
 
-        $refresher->refresh(base64_encode($rawToken));
+        $refresher->getPairByRefreshToken(base64_encode($rawToken));
     }
 
     private function createToken(string $email, int $validUntilTimestamp): RefreshToken
@@ -72,6 +93,17 @@ class RefreshTokenRefresherTest extends TestCase
             bin2hex(random_bytes(16)),
             new \DateTimeImmutable('-1 minute'),
             new \DateTimeImmutable()
+        );
+    }
+
+    private function createJwtToken(string $email): JwtToken
+    {
+        return new JwtToken(
+            AlgorithmEnum::RS256,
+            TokenTypeEnum::JWT,
+            $email,
+            (new DateTimeFactory())->getNowDate(time()),
+            (new DateTimeFactory())->getNowDate(time() + 3600)
         );
     }
 

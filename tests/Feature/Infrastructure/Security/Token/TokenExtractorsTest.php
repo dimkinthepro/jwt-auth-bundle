@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dimkinthepro\JwtAuth\Tests\Feature\Infrastructure\Security\Token;
 
-use Dimkinthepro\JwtAuth\Application\UseCase\JwtToken\JwtTokenCreator;
+use Dimkinthepro\JwtAuth\Application\Component\Manager\JwtTokenManager;
 use Dimkinthepro\JwtAuth\Infrastructure\Security\Token\ChainTokenExtractor;
 use Dimkinthepro\JwtAuth\Infrastructure\Security\Token\TokenExtractorInterface;
 use Dimkinthepro\JwtAuth\Tests\Feature\ResetDatabaseTrait;
@@ -71,8 +71,8 @@ class TokenExtractorsTest extends WebTestCase
 
     private function createJwtToken(): string
     {
-        /** @var JwtTokenCreator $creator */
-        $creator = self::getContainer()->get(JwtTokenCreator::class);
+        /** @var JwtTokenManager $creator */
+        $creator = self::getContainer()->get(JwtTokenManager::class);
 
         // The test app enables the blocklist, and it requires a session id claim in every token
         return $creator->create('user@example.com', bin2hex(random_bytes(16)))->getEncodedToken();

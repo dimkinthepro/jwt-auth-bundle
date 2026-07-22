@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dimkinthepro\JwtAuth\Application\UseCase\JwtToken;
+namespace Dimkinthepro\JwtAuth\Application\UseCase\Token;
 
 use Dimkinthepro\JwtAuth\Application\Component\Blocklist\TokenBlocklistInterface;
 use Dimkinthepro\JwtAuth\Application\Component\Decoder\JwtTokenDecoderInterface;
@@ -14,7 +14,7 @@ use Dimkinthepro\JwtAuth\Domain\Enum\TokenDictionaryEnum;
 use Dimkinthepro\JwtAuth\Infrastructure\Exception\InvalidTokenException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-class JwtTokenExtractor
+class JwtTokenDecoder
 {
     public function __construct(
         private readonly JwtTokenDecoderInterface $tokenDecoder,
@@ -28,7 +28,7 @@ class JwtTokenExtractor
     /**
      * @throws JwtAuthExceptionInterface
      */
-    public function extract(string $token): JwtToken
+    public function decodeTokenFromString(string $token): JwtToken
     {
         $jwtToken = $this->tokenDecoder->decode($token);
         $this->jwtTokenValidator->validate($jwtToken);

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Dimkinthepro\JwtAuth\Application\UseCase\RefreshToken;
+namespace Dimkinthepro\JwtAuth\Application\UseCase\Token;
 
-use Dimkinthepro\JwtAuth\Application\Component\Manager\RefreshTokenManager;
+use Dimkinthepro\JwtAuth\Application\Component\Manager\RefreshTokenManagerInterface;
 use Dimkinthepro\JwtAuth\Infrastructure\Factory\DateTimeFactory;
 
-readonly class ExpiredRefreshTokensPurger
+readonly class ExpiredRefreshTokensRemover
 {
     public function __construct(
-        private RefreshTokenManager $refreshTokenManager,
+        private RefreshTokenManagerInterface $refreshTokenManager,
         private DateTimeFactory $dateTimeFactory,
     ) {
     }
@@ -20,7 +20,7 @@ readonly class ExpiredRefreshTokensPurger
      *
      * @throws \Exception
      */
-    public function purge(): int
+    public function removeExpiredTokens(): int
     {
         return $this->refreshTokenManager->deleteExpiredTokens($this->dateTimeFactory->getNowDate());
     }

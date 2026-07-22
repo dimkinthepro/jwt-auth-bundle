@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Dimkinthepro\JwtAuth\Tests\Feature\Application\UseCase;
 
-use Dimkinthepro\JwtAuth\Application\UseCase\JwtToken\JwtTokenCreator;
-use Dimkinthepro\JwtAuth\Application\UseCase\JwtToken\JwtTokenExtractor;
+use Dimkinthepro\JwtAuth\Application\Component\Manager\JwtTokenManager;
+use Dimkinthepro\JwtAuth\Application\UseCase\Token\JwtTokenDecoder;
 use Dimkinthepro\JwtAuth\Domain\Enum\TokenDictionaryEnum;
 use Dimkinthepro\JwtAuth\Tests\Feature\EventListener\TestCustomClaimsListener;
 use Faker\Factory;
@@ -13,17 +13,17 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class GenerateAndVerifyJwtTokenUseCasesTest extends KernelTestCase
 {
-    private JwtTokenCreator $jwtTokenCreator;
-    private JwtTokenExtractor $jwtTokenExtractor;
+    private JwtTokenManager $jwtTokenCreator;
+    private JwtTokenDecoder $jwtTokenExtractor;
 
     protected function setUp(): void
     {
-        /** @var JwtTokenCreator $jwtTokenCreator */
-        $jwtTokenCreator = self::getContainer()->get(JwtTokenCreator::class);
+        /** @var JwtTokenManager $jwtTokenCreator */
+        $jwtTokenCreator = self::getContainer()->get(JwtTokenManager::class);
         $this->jwtTokenCreator = $jwtTokenCreator;
 
-        /** @var JwtTokenExtractor $jwtTokenExtractor */
-        $jwtTokenExtractor = self::getContainer()->get(JwtTokenExtractor::class);
+        /** @var JwtTokenDecoder $jwtTokenExtractor */
+        $jwtTokenExtractor = self::getContainer()->get(JwtTokenDecoder::class);
         $this->jwtTokenExtractor = $jwtTokenExtractor;
     }
 
@@ -33,7 +33,7 @@ class GenerateAndVerifyJwtTokenUseCasesTest extends KernelTestCase
 
         // The test app enables the blocklist, and it requires a session id claim in every token
         $jwtToken = $this->jwtTokenCreator->create($email, bin2hex(random_bytes(16)));
-        $verifiedToken = $this->jwtTokenExtractor->extract($jwtToken->getEncodedToken());
+        $verifiedToken = $this->jwtTokenExtractor->decodeTokenFromString($jwtToken->getEncodedToken());
 
         self::assertEquals($email, $verifiedToken->getUserIdentifier());
         self::assertEquals($jwtToken->getAlgorithm(), $verifiedToken->getAlgorithm());

@@ -9,7 +9,7 @@ use Dimkinthepro\JwtAuth\Application\Component\Factory\JwtTokenFactoryInterface;
 use Dimkinthepro\JwtAuth\Application\Component\Provider\JwtTokenSignerInterface;
 use Dimkinthepro\JwtAuth\Domain\Entity\JwtToken;
 
-readonly class JwtTokenManager
+readonly class JwtTokenManager implements JwtTokenManagerInterface
 {
     public function __construct(
         private JwtTokenFactoryInterface $jwtTokenFactory,

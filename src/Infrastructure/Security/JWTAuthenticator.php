@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Dimkinthepro\JwtAuth\Infrastructure\Security;
 
+use Dimkinthepro\JwtAuth\Application\UseCase\Token\JwtTokenDecoder;
 use Dimkinthepro\JwtAuth\Infrastructure\Event\JwtTokenAuthenticatedEvent;
 use Dimkinthepro\JwtAuth\Infrastructure\Event\JwtTokenExpiredEvent;
 use Dimkinthepro\JwtAuth\Infrastructure\Event\JwtTokenInvalidEvent;
 use Dimkinthepro\JwtAuth\Infrastructure\Event\JwtTokenNotFoundEvent;
 use Dimkinthepro\JwtAuth\Infrastructure\Exception\JwtTokenExpiredException;
 use Dimkinthepro\JwtAuth\Infrastructure\Security\Token\TokenExtractorInterface;
-use Dimkinthepro\JwtAuth\Infrastructure\Service\TokenServiceInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,14 +26,14 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class JWTAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
+    public const TOKEN_ATTRIBUTE = 'token';
     public const JWT_TOKEN_ATTRIBUTE = 'jwtToken';
-
     private const WWW_AUTHENTICATE_HEADER = 'WWW-Authenticate';
 
     public function __construct(
+        private readonly JwtTokenDecoder $jwtTokenDecoder,
         private readonly TokenExtractorInterface $tokenExtractor,
         private readonly UserProviderInterface $userProvider,
-        private readonly TokenServiceInterface $tokenService,
         private readonly EventDispatcherInterface $eventDispatcher,
     ) {
     }
@@ -60,7 +60,7 @@ class JWTAuthenticator extends AbstractAuthenticator implements AuthenticationEn
     public function authenticate(Request $request): Passport
     {
         $token = $this->tokenExtractor->extractToken($request);
-        $jwtToken = $this->tokenService->extractJwtToken($token);
+        $jwtToken = $this->jwtTokenDecoder->decodeTokenFromString($token);
 
         $passport = new SelfValidatingPassport(
             new UserBadge(
@@ -71,7 +71,7 @@ class JWTAuthenticator extends AbstractAuthenticator implements AuthenticationEn
             )
         );
 
-        $passport->setAttribute('token', $token);
+        $passport->setAttribute(self::TOKEN_ATTRIBUTE, $token);
         $passport->setAttribute(self::JWT_TOKEN_ATTRIBUTE, $jwtToken);
 
         $this->eventDispatcher->dispatch(new JwtTokenAuthenticatedEvent($jwtToken, $passport));
@@ -99,7 +99,7 @@ class JWTAuthenticator extends AbstractAuthenticator implements AuthenticationEn
         // so clients can trigger the refresh flow on 401 (403 is reserved for insufficient rights)
         $isExpired = $exception instanceof JwtTokenExpiredException;
         $defaultResponse = new JsonResponse(
-            ['d2d7805b-ca35-449c-8958-5934e8012005 Bad token'],
+            ['Bad token'],
             Response::HTTP_UNAUTHORIZED,
             [
                 self::WWW_AUTHENTICATE_HEADER => $isExpired

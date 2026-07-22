@@ -138,7 +138,9 @@ class UserRolesClaimsListener
 ```
 Read the claims back from the verified token:
 ```php
-$jwtToken = $tokenService->extractJwtToken($encodedToken);
+use Dimkinthepro\JwtAuth\Application\UseCase\JwtToken\JwtTokenDecoder;
+
+$jwtToken = $jwtTokenDecoder->decodeTokenFromString($encodedToken);
 $role = $jwtToken->getClaim('role');
 ```
 
@@ -196,7 +198,7 @@ with `blocklist.enabled: true` the outstanding access tokens die instantly.
 
 With the blocklist enabled every token must carry the `sid` claim: a token without a session id
 could never be revoked, so it is rejected. Tokens issued by the login and refresh endpoints always
-have it; when creating tokens manually, pass a session id to `TokenService::createJwtToken()`.
+have it; when creating tokens manually, pass a session id to `JwtTokenManager::create()`.
 
 ### 13. Split cookies for browser SPAs (optional):
 Enable the `split_cookie` extractor and set the cookies on login with a `kernel.response` listener —

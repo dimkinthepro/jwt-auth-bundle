@@ -13,7 +13,7 @@ use Dimkinthepro\JwtAuth\Application\Component\Repository\RefreshTokenWriteRepos
 use Dimkinthepro\JwtAuth\Domain\Entity\RefreshToken;
 use Dimkinthepro\JwtAuth\Infrastructure\Exception\RefreshTokenNotFoundException;
 
-class RefreshTokenManager
+class RefreshTokenManager implements RefreshTokenManagerInterface
 {
     private const int CREATE_TOKEN_MAX_ATTEMPTS = 3;
 

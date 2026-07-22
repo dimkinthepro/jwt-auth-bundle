@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Dimkinthepro\JwtAuth\Tests\Unit\Application\UseCase\JwtToken;
+namespace Dimkinthepro\JwtAuth\Tests\Unit\Application\UseCase\Token;
 
 use Dimkinthepro\JwtAuth\Application\Component\Blocklist\TokenBlocklistInterface;
 use Dimkinthepro\JwtAuth\Application\Component\Decoder\JwtTokenDecoderInterface;
 use Dimkinthepro\JwtAuth\Application\Component\Event\JwtTokenDecodedEvent;
 use Dimkinthepro\JwtAuth\Application\Component\Validator\JwtTokenValidatorInterface;
-use Dimkinthepro\JwtAuth\Application\UseCase\JwtToken\JwtTokenExtractor;
+use Dimkinthepro\JwtAuth\Application\UseCase\Token\JwtTokenDecoder;
 use Dimkinthepro\JwtAuth\Domain\Entity\JwtToken;
 use Dimkinthepro\JwtAuth\Domain\Enum\AlgorithmEnum;
 use Dimkinthepro\JwtAuth\Domain\Enum\TokenDictionaryEnum;
@@ -27,7 +27,7 @@ class JwtTokenExtractorTest extends TestCase
         $jwtToken = $this->createToken();
         $extractor = $this->createExtractor($jwtToken, new EventDispatcher());
 
-        self::assertSame($jwtToken, $extractor->extract('encoded.jwt.token'));
+        self::assertSame($jwtToken, $extractor->decodeTokenFromString('encoded.jwt.token'));
     }
 
     public function testDecodedEventListenerCanRejectToken(): void
@@ -44,7 +44,7 @@ class JwtTokenExtractorTest extends TestCase
         self::expectException(InvalidTokenException::class);
         self::expectExceptionMessage('Token rejected by listener');
 
-        $extractor->extract('encoded.jwt.token');
+        $extractor->decodeTokenFromString('encoded.jwt.token');
     }
 
     private function createToken(): JwtToken
@@ -86,7 +86,7 @@ class JwtTokenExtractorTest extends TestCase
         self::expectException(InvalidTokenException::class);
         self::expectExceptionMessage('Token revoked');
 
-        $extractor->extract('encoded.jwt.token');
+        $extractor->decodeTokenFromString('encoded.jwt.token');
     }
 
     public function testTokenWithoutSessionIdIsRejectedWhenBlocklistIsEnabled(): void
@@ -97,7 +97,7 @@ class JwtTokenExtractorTest extends TestCase
         self::expectException(InvalidTokenException::class);
         self::expectExceptionMessage('Token has no session id claim');
 
-        $extractor->extract('encoded.jwt.token');
+        $extractor->decodeTokenFromString('encoded.jwt.token');
     }
 
     public function testTokenWithoutSessionIdIsAcceptedWhenBlocklistIsDisabled(): void
@@ -105,7 +105,7 @@ class JwtTokenExtractorTest extends TestCase
         $jwtToken = $this->createToken();
         $extractor = $this->createExtractor($jwtToken, new EventDispatcher());
 
-        self::assertSame($jwtToken, $extractor->extract('encoded.jwt.token'));
+        self::assertSame($jwtToken, $extractor->decodeTokenFromString('encoded.jwt.token'));
     }
 
     private function createExtractor(
@@ -113,11 +113,11 @@ class JwtTokenExtractorTest extends TestCase
         EventDispatcher $eventDispatcher,
         ?TokenBlocklistInterface $blocklist = null,
         bool $blocklistEnabled = false
-    ): JwtTokenExtractor {
+    ): JwtTokenDecoder {
         $decoder = $this->createMock(JwtTokenDecoderInterface::class);
         $decoder->method('decode')->willReturn($jwtToken);
 
-        return new JwtTokenExtractor(
+        return new JwtTokenDecoder(
             $decoder,
             $this->createMock(JwtTokenValidatorInterface::class),
             $eventDispatcher,

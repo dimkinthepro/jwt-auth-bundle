@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Dimkinthepro\JwtAuth\Tests\Unit\Infrastructure\Security;
 
-use Dimkinthepro\JwtAuth\Application\UseCase\JwtToken\JwtTokenCreator;
-use Dimkinthepro\JwtAuth\Application\UseCase\JwtToken\JwtTokenExtractor;
-use Dimkinthepro\JwtAuth\Application\UseCase\RefreshToken\RefreshTokenCreator;
-use Dimkinthepro\JwtAuth\Application\UseCase\RefreshToken\RefreshTokenRefresher;
+use Dimkinthepro\JwtAuth\Application\UseCase\Token\JwtTokenDecoder;
 use Dimkinthepro\JwtAuth\Domain\Entity\JwtToken;
 use Dimkinthepro\JwtAuth\Domain\Enum\AlgorithmEnum;
 use Dimkinthepro\JwtAuth\Domain\Enum\TokenTypeEnum;
@@ -19,7 +16,6 @@ use Dimkinthepro\JwtAuth\Infrastructure\Exception\JwtTokenExpiredException;
 use Dimkinthepro\JwtAuth\Infrastructure\Factory\DateTimeFactory;
 use Dimkinthepro\JwtAuth\Infrastructure\Security\JWTAuthenticator;
 use Dimkinthepro\JwtAuth\Infrastructure\Security\Token\BearerTokenExtractor;
-use Dimkinthepro\JwtAuth\Infrastructure\Service\TokenService;
 use Faker\Factory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -95,9 +91,9 @@ class JWTAuthenticatorTest extends TestCase
     private function createAuthenticator(string $email, ?EventDispatcher $eventDispatcher = null): JWTAuthenticator
     {
         return new JWTAuthenticator(
+            $this->createJwtTokenDecoder($email),
             new BearerTokenExtractor(),
             $this->createMock(UserProviderInterface::class),
-            $this->createTokenService($email),
             $eventDispatcher ?? new EventDispatcher()
         );
     }
@@ -171,7 +167,7 @@ class JWTAuthenticatorTest extends TestCase
         self::assertEquals($email, $passport->getAttribute('userIdentifier'));
     }
 
-    private function createTokenService(string $email): TokenService
+    private function createJwtTokenDecoder(string $email): JwtTokenDecoder
     {
         $jwtToken = new JwtToken(
             AlgorithmEnum::RS256,
@@ -181,15 +177,10 @@ class JWTAuthenticatorTest extends TestCase
             (new DateTimeFactory())->getNowDate(time() + 3600)
         );
 
-        $jwtTokenExtractor = $this->createMock(JwtTokenExtractor::class);
-        $jwtTokenExtractor->method('extract')->willReturn($jwtToken);
+        $jwtTokenDecoder = $this->createMock(JwtTokenDecoder::class);
+        $jwtTokenDecoder->method('decodeTokenFromString')->willReturn($jwtToken);
 
-        return new TokenService(
-            $this->createMock(JwtTokenCreator::class),
-            $jwtTokenExtractor,
-            $this->createMock(RefreshTokenCreator::class),
-            $this->createMock(RefreshTokenRefresher::class)
-        );
+        return $jwtTokenDecoder;
     }
 
     private function createRequest(?string $authorizationHeader): Request

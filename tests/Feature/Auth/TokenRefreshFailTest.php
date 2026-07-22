@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dimkinthepro\JwtAuth\Tests\Feature\Auth;
 
-use Dimkinthepro\JwtAuth\Application\UseCase\RefreshToken\RefreshTokenCreator;
+use Dimkinthepro\JwtAuth\Application\Component\Manager\RefreshTokenManager;
 use Dimkinthepro\JwtAuth\Infrastructure\Encoder\Base64FieldsEncoder;
 use Dimkinthepro\JwtAuth\Tests\Feature\ResetDatabaseTrait;
 use Doctrine\DBAL\Connection;
@@ -104,8 +104,8 @@ class TokenRefreshFailTest extends WebTestCase
 
     private function createRefreshToken(): string
     {
-        /** @var RefreshTokenCreator $creator */
-        $creator = self::getContainer()->get(RefreshTokenCreator::class);
+        /** @var RefreshTokenManager $creator */
+        $creator = self::getContainer()->get(RefreshTokenManager::class);
 
         return $creator->create('user@example.com')->getEncodedToken();
     }

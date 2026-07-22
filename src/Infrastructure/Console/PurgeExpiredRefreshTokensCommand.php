@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dimkinthepro\JwtAuth\Infrastructure\Console;
 
-use Dimkinthepro\JwtAuth\Application\UseCase\RefreshToken\ExpiredRefreshTokensPurger;
+use Dimkinthepro\JwtAuth\Application\UseCase\Token\ExpiredRefreshTokensRemover;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,7 +18,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class PurgeExpiredRefreshTokensCommand extends Command
 {
     public function __construct(
-        private readonly ExpiredRefreshTokensPurger $expiredRefreshTokensPurger,
+        private readonly ExpiredRefreshTokensRemover $expiredRefreshTokensRemover,
     ) {
         parent::__construct();
     }
@@ -28,7 +28,7 @@ class PurgeExpiredRefreshTokensCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $deletedCount = $this->expiredRefreshTokensPurger->purge();
+            $deletedCount = $this->expiredRefreshTokensRemover->removeExpiredTokens();
         } catch (\Throwable $e) {
             $io->error(\sprintf('Expired refresh tokens purge error: "%s"', $e->getMessage()));
 

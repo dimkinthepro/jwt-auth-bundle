@@ -7,7 +7,7 @@ namespace Dimkinthepro\JwtAuth\Application\DTO;
 /**
  * Read model of a device session: exposes no token material.
  */
-final readonly class SessionDto
+readonly class SessionDto
 {
     public function __construct(
         public string $sessionId,

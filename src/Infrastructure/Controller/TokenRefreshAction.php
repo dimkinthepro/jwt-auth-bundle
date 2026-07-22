@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Dimkinthepro\JwtAuth\Infrastructure\Controller;
 
 use Dimkinthepro\JwtAuth\Application\Component\Exception\JwtAuthExceptionInterface;
+use Dimkinthepro\JwtAuth\Application\UseCase\Token\TokenPairRefresher;
 use Dimkinthepro\JwtAuth\Infrastructure\DTO\RefreshTokenFormDto;
 use Dimkinthepro\JwtAuth\Infrastructure\Enum\TokenResponseEnum;
 use Dimkinthepro\JwtAuth\Infrastructure\Form\RefreshTokenForm;
 use Dimkinthepro\JwtAuth\Infrastructure\Response\ResponseTrait;
-use Dimkinthepro\JwtAuth\Infrastructure\Service\TokenServiceInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -23,7 +23,7 @@ readonly class TokenRefreshAction
 
     public function __construct(
         private FormFactoryInterface $formFactory,
-        private TokenServiceInterface $tokenService
+        private TokenPairRefresher $tokenPairRefresher,
     ) {
     }
 
@@ -53,18 +53,14 @@ readonly class TokenRefreshAction
         $data = $form->getData();
 
         try {
-            $refreshToken = $this->tokenService->refreshRefreshToken($data->refreshToken);
-            $jwtToken = $this->tokenService->createJwtToken(
-                $refreshToken->getUserIdentifier(),
-                $refreshToken->getSessionId()
-            );
+            $tokenPair = $this->tokenPairRefresher->getPairByRefreshToken($data->refreshToken);
         } catch (JwtAuthExceptionInterface $e) {
             throw new BadRequestHttpException('e6c8c8a6-c729-48f5-9aae-1df5cf810478 Invalid token');
         }
 
         return $this->successJson([
-            TokenResponseEnum::TOKEN->value => $jwtToken->getEncodedToken(),
-            TokenResponseEnum::REFRESH_TOKEN->value => $refreshToken->getEncodedToken(),
+            TokenResponseEnum::TOKEN->value => $tokenPair->token->getEncodedToken(),
+            TokenResponseEnum::REFRESH_TOKEN->value => $tokenPair->refreshToken->getEncodedToken(),
         ]);
     }
 
